@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.interledger.connector</groupId>
+    <artifactId>connector-parent</artifactId>
+    <version>HEAD-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.interledger.example</groupId>
+  <artifactId>example-ilpv4-connector-extended</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Connector :: Server :: Custom</name>
+  <description>ILPv4 Connector with an example extension</description>
+
+  <properties>
+    <connector.server.version>${project.parent.version}</connector.server.version>
+    <container.image>interledger4j/example-custom-java-ilpv4-connector</container.image>
+    <container.version>${project.version}</container.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>repackage</id>
+            <configuration>
+              <classifier>exec</classifier>
+            </configuration>
+          </execution>
+          <execution>
+            <id>build-info</id>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>org.interledger.connector.server.Application</mainClass>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>analyze</id>
+            <goals>
+              <goal>analyze-only</goal>
+            </goals>
+            <configuration>
+              <failOnWarning>true</failOnWarning>
+              <ignoredDependencies>
+                <!-- this gets included just so it's easy to run the connector from the project -->
+                <ignoredDependency>org.interledger.connector:connector-server:jar</ignoredDependency>
+              </ignoredDependencies>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>1.8.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <!-- dockerBuild just creates image locally -->
+              <goal>dockerBuild</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <from>
+            <image>interledger4j/java-ilpv4-connector:nhartner</image>
+          </from>
+          <to>
+            <image>${container.image}:${container.version}</image>
+          </to>
+          <container>
+            <ports>
+              <port>8080</port>
+            </ports>
+            <useCurrentTimestamp>true</useCurrentTimestamp>
+            <jvmFlags>
+              <jvmFlag>-server</jvmFlag>
+              <jvmFlag>-Xverify:none</jvmFlag>
+              <jvmFlag>-XX:TieredStopAtLevel=1</jvmFlag>
+              <jvmFlag>-Dspring.profiles.default=dev</jvmFlag>
+            </jvmFlags>
+          </container>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.interledger.connector</groupId>
+      <artifactId>connector-server</artifactId>
+      <version>${connector.server.version}</version>
+      <!-- provided because it's already packaged by jib in the source docker image but as a class folder not a jar -->
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.interledger.connector</groupId>
+      <artifactId>connector-service-api</artifactId>
+      <version>${connector.server.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>

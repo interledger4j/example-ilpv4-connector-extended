@@ -1,0 +1,10 @@
+# all default configuration for this extended connector goes in here
+# additional application-xxx.yml files can be used to override these defaults via profile
+
+interledger:
+  connector:
+    extensions:
+      basePackage: org.interledger.example.connector.extensions
+
+example:
+  message: hello y'all
